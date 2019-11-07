@@ -2,3 +2,7 @@
     background-color: orange;
     height: 3px;
 }
+
+.rbc-row-segment .rbc-event-content {
+    white-space: initial;
+}
