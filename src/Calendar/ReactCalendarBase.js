@@ -193,26 +193,6 @@ const customFreqOptions = [
 const categories = [
 ];
 
-const eventEdgeColor = (attendance) => {
-  let edgeColor;
-  if (attendance === 'Present ($)') {
-    edgeColor = 'green';
-  } else if (attendance === 'Absent, no notice ($)') {
-    edgeColor = 'red';
-  } else if (attendance === 'Absent, notice') {
-    edgeColor = 'yellow';
-  }
-  
-  return attendance ? {
-    border: "none",
-    backgroundColor: "#80cbc4",
-    borderLeft: "5px solid " + edgeColor
-  } : {
-    border: "none",
-    backgroundColor: "#80cbc4"
-  }
-}
-
 const CustomToolbar = ({label, onNavigate, view, onView}) => {
   return (
     <div className="rbc-toolbar">
@@ -232,20 +212,39 @@ const CustomToolbar = ({label, onNavigate, view, onView}) => {
 }
 
 const DefaultEventWrapper = ({event, onSelect, onClick, selected, label, type, children}) => {
+  const { className } = children.props;
+  
+  const title = `${localizer.format(event.start, "h:mm a")} - ${localizer.format(event.end, "h:mm a")}; ${event.resource.client} (${event.resource.therapist})`;
+
+  let edgeColor;
+  if (event.resource.attendance === 'Present ($)') {
+    edgeColor = 'green';
+  } else if (event.resource.attendance === 'Absent, no notice ($)') {
+    edgeColor = 'red';
+  } else if (event.resource.attendance === 'Absent, notice') {
+    edgeColor = 'yellow';
+  }
+
+  const customClass = `${className} rbc-event--${edgeColor}`;
+  const hourStart = 60 * moment(event.start).hour() + moment(event.start).minutes();
+  const hourStop = 60 * moment(event.end).hour() + moment(event.end).minutes();
+  const top = hourStart * 100 / (60 * 24);
+  const height = (hourStop - hourStart) * 100 / (60 * 24);
+
   return (
     type === "date" ? (
       children.props.type === "popup" ? (
-        <div type="popup" tabIndex="0" className="rbc-event" style={eventEdgeColor(event.resource.attendance)} onClick={() => onSelect(event)}>
-          <div className="rbc-event-content" title={event.title}>{localizer.format(event.start, "h:mm a")} - {localizer.format(event.end, "h:mm a")}; {event.resource.client} ({event.resource.therapist})</div>
+        <div type="popup" tabIndex="0" className={customClass} onClick={() => onSelect(event)}>
+          <div className="rbc-event-content" title={title}>{title}</div>
         </div>
       ) : (
-        <div tabIndex="0" className="rbc-event" style={eventEdgeColor(event.resource.attendance)} onClick={() => onSelect(event)}>
-          <div className="rbc-event-content" title={event.title}>{localizer.format(event.start, "h:mm a")} - {localizer.format(event.end, "h:mm a")}; {event.resource.client} ({event.resource.therapist})</div>
+        <div tabIndex="0" className={customClass} style={{height: "100%"}} onClick={() => onSelect(event)}>
+          <div className="rbc-event-content" title={title}>{title}</div>
         </div>
       )
     ) : (
-      <div title={event.title} className={selected ? "rbc-event rbc-selected" : "rbc-event"} style={eventEdgeColor(event.resource.attendance)} onClick={() => onClick()}>
-        <div className="rbc-event-label">{label}</div>
+      <div title={event.title} className={customClass} style={{ gridRow: "1 / span 1", top: `${top}%`, height: `${height}%` }} onClick={() => onClick()}>
+        <div className="rbc-event-label">{label};</div>
         <div className="rbc-event-content">{event.resource.client} ({event.resource.therapist})</div>
       </div>
     )
@@ -1067,10 +1066,10 @@ class ReactCalendarBase extends Component {
             onSelectEvent={this.handleClickOpen2}
             onSelectSlot={this.handleClickOpen}
             dayPropGetter={customDayPropGetter}
-            // (this sets the start time of 8am)
-            min={new Date(2000, 1, 1, 8)}
-            // this sets the end time of 8pm)
-            max={new Date(2000, 1, 1, 20)}
+            // // (this sets the start time of 8am)
+            // min={new Date(2000, 1, 1, 8)}
+            // // this sets the end time of 8pm)
+            // max={new Date(2000, 1, 1, 20)}
             popup={true}
             components={{
               // custom wrapper here
